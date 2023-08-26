@@ -178,6 +178,7 @@ class JSQuAD(Task):
         predictions, references = zip(*item)
         return self._squad_metric(predictions=predictions, references=references)[key]
 
+
 class JSQuADWithFintanPrompt(JSQuAD):
     """
     prompt template is taken from [ChatGPT vs BERT: どちらが日本語をより理解できるのか?](https://fintan.jp/page/9126/)
@@ -188,6 +189,27 @@ class JSQuADWithFintanPrompt(JSQuAD):
     def doc_to_text(self, doc):
         return (
             "文章:"
+            + doc["context"].split("[SEP]")[-1].strip()
+            + f"{self.SEP}"
+            + "質問:"
+            + doc["question"]
+            + f"{self.SEP}"
+            + "回答:"
+        )
+
+
+class JSQuADWithFintanPromptHavingTitle(JSQuADWithFintanPrompt):
+    """
+    prompt template is based on [ChatGPT vs BERT: どちらが日本語をより理解できるのか?](https://fintan.jp/page/9126/)
+    """
+    PROMPT_VERSION = 0.21
+    DESCRIPTION = "質問に対する回答を題名と文章から一言で抽出してください。回答は名詞で答えてください。\n\n"
+    def doc_to_text(self, doc):
+        return (
+            "題名:"
+            + doc["title"]
+            + f"{self.SEP}"
+            + "文章:"
             + doc["context"].split("[SEP]")[-1].strip()
             + f"{self.SEP}"
             + "質問:"
@@ -231,6 +253,38 @@ class JSQuADWithJAAlpacaPrompt(JSQuAD):
         return f"### 指示:\n{self.INSTRUCTION}\n\n### 入力:\n{input_text}\n\n### 応答:\n"
 
 
+class JSQuADWithJAAlpacaPromptHavingTitle(JSQuADWithJAAlpacaPrompt):
+    """
+    This prompt format was inspired by the below data in fujiki/japanese_alpaca_data. 
+    ```
+    {
+        'instruction': '与えられた文脈に最も適した文を選択してください。', 
+        'input': '文脈：あなたは親友と現在の仕事の状況について話しています。\nA）私にはあまり選択肢がありません。\nB）他に選択肢がありません。\nC）私には本当に決断する必要がありません。', 
+        'output': 'A) 私には多くの選択肢がありません。'
+    }
+    ```
+    Reference:
+    - data: https://huggingface.co/datasets/fujiki/japanese_alpaca_data
+    - code: https://github.com/Stability-AI/gpt-neox/blob/c130a4edc1120dccec8f02a34eb60d3e8f484cd3/finetune/finetune_base_ja.py#LL118C23-L127C11
+    """
+    PROMPT_VERSION = 0.31
+    def doc_to_text(self, doc):
+        """
+        以下は、タスクを説明する指示と、文脈のある入力の組み合わせです。要求を適切に満たす応答を書きなさい。
+
+        ### 指示: 
+        {instruction}
+
+        ### 入力: 
+        {input}
+
+        ### 応答: 
+        {response}
+        """
+        input_text = f"文脈：{doc['title']}\n{doc['context'].split('[SEP]')[-1].strip()}\n質問：{doc['question']}"
+        return f"### 指示:\n{self.INSTRUCTION}\n\n### 入力:\n{input_text}\n\n### 応答:\n"
+
+
 class JSQuADWithRinnaInstructionSFT(JSQuAD):
     """
     Reference:
@@ -247,6 +301,18 @@ class JSQuADWithRinnaInstructionSFT(JSQuAD):
         return f"ユーザー: {input_text}{self.SEP}システム: "
 
 
+class JSQuADWithRinnaInstructionSFTHavingTitle(JSQuADWithRinnaInstructionSFT):
+    """
+    Reference:
+    - HF Hub: https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-sft
+    """
+    PROMPT_VERSION = 0.41
+
+    def doc_to_text(self, doc):
+        input_text = f"文脈：{doc['title']}\n{doc['context'].split('[SEP]')[-1].strip()}{self.SEP}質問：{doc['question']}"
+        return f"ユーザー: {input_text}{self.SEP}システム: "
+
+
 class JSQuADWithRinnaBilingualInstructionSFT(JSQuADWithRinnaInstructionSFT):
     """
     Reference:
@@ -257,13 +323,28 @@ class JSQuADWithRinnaBilingualInstructionSFT(JSQuADWithRinnaInstructionSFT):
     SEP = "\n"
     FEWSHOT_SEP = "\n"
 
+
+class JSQuADWithRinnaBilingualInstructionSFTHavingTitle(JSQuADWithRinnaInstructionSFTHavingTitle):
+    """
+    Reference:
+    - HF Hub: https://huggingface.co/rinna/bilingual-gpt-neox-4b-instruction-sft
+    """
+    PROMPT_VERSION = 0.51
+    DESCRIPTION = "ユーザー: 与えられた文脈から、質問に対する答えを抜き出してください。\nシステム: 分かりました。\n"
+    SEP = "\n"
+    FEWSHOT_SEP = "\n"
+
     
 VERSIONS = [
     JSQuAD,
     JSQuADWithFintanPrompt,
+    JSQuADWithFintanPromptHavingTitle,
     JSQuADWithJAAlpacaPrompt,
+    JSQuADWithJAAlpacaPromptHavingTitle,
     JSQuADWithRinnaInstructionSFT,
+    JSQuADWithRinnaInstructionSFTHavingTitle,
     JSQuADWithRinnaBilingualInstructionSFT,
+    JSQuADWithRinnaBilingualInstructionSFTHavingTitle
 ]
 
 
