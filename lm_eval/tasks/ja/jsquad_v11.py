@@ -36,11 +36,11 @@ _CITATION = """
 DYNAMIC_MAX_LENGTH = os.getenv("DYNAMIC_MAX_LENGTH", "true").lower()
 
 
-class JSQuAD(Task):
+class JSQuADV11(Task):
     """
     prompt template is taken from [日本語に特化した60億パラメータ規模のGPTモデルの構築と評価](https://www.anlp.jp/proceedings/annual_meeting/2023/pdf_dir/H9-4.pdf)
     """
-    VERSION = 1.2
+    VERSION = 1.1
     PROMPT_VERSION = 0.1
     DATASET_PATH = "shunk031/JGLUE"
     DATASET_NAME = "JSQuAD"
@@ -179,19 +179,16 @@ class JSQuAD(Task):
         return self._squad_metric(predictions=predictions, references=references)[key]
 
 
-class JSQuADWithFintanPrompt(JSQuAD):
+class JSQuADV11WithFintanPrompt(JSQuADV11):
     """
     prompt template is taken from [ChatGPT vs BERT: どちらが日本語をより理解できるのか?](https://fintan.jp/page/9126/)
     """
     PROMPT_VERSION = 0.2
-    DESCRIPTION = "質問に対する回答を題名と文章から一言で抽出してください。回答は名詞で答えてください。\n\n"
+    DESCRIPTION = "質問に対する回答を文章から一言で抽出してください。回答は名詞で答えてください。\n\n"
     SEP = "\n"
     def doc_to_text(self, doc):
         return (
-            "題名:"
-            + doc["title"]
-            + f"{self.SEP}"
-            + "文章:"
+            "文章:"
             + doc["context"].split("[SEP]")[-1].strip()
             + f"{self.SEP}"
             + "質問:"
@@ -199,9 +196,9 @@ class JSQuADWithFintanPrompt(JSQuAD):
             + f"{self.SEP}"
             + "回答:"
         )
+    
 
-
-class JSQuADWithJAAlpacaPrompt(JSQuAD):
+class JSQuADV11WithJAAlpacaPrompt(JSQuADV11):
     """
     This prompt format was inspired by the below data in fujiki/japanese_alpaca_data. 
     ```
@@ -231,11 +228,11 @@ class JSQuADWithJAAlpacaPrompt(JSQuAD):
         ### 応答: 
         {response}
         """
-        input_text = f"文脈：{doc['title']}\n{doc['context'].split('[SEP]')[-1].strip()}\n質問：{doc['question']}"
+        input_text = f"文脈：{doc['context'].split('[SEP]')[-1].strip()}\n質問：{doc['question']}"
         return f"### 指示:\n{self.INSTRUCTION}\n\n### 入力:\n{input_text}\n\n### 応答:\n"
 
 
-class JSQuADWithRinnaInstructionSFT(JSQuAD):
+class JSQuADV11WithRinnaInstructionSFT(JSQuADV11):
     """
     Reference:
     - HF Hub: https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-sft
@@ -246,11 +243,12 @@ class JSQuADWithRinnaInstructionSFT(JSQuAD):
     FEWSHOT_SEP = "<NL>"
 
     def doc_to_text(self, doc):
-        input_text = f"文脈：{doc['title']}\n{doc['context'].split('[SEP]')[-1].strip()}{self.SEP}質問：{doc['question']}"
+        input_text = f"文脈：{doc['context'].split('[SEP]')[-1].strip()}{self.SEP}質問：{doc['question']}"
+        # input_text = f"質問：{doc['question']}<NL>文脈：{doc['context'].split('[SEP]')[-1].strip()}"
         return f"ユーザー: {input_text}{self.SEP}システム: "
 
 
-class JSQuADWithRinnaBilingualInstructionSFT(JSQuADWithRinnaInstructionSFT):
+class JSQuADV11WithRinnaBilingualInstructionSFT(JSQuADV11WithRinnaInstructionSFT):
     """
     Reference:
     - HF Hub: https://huggingface.co/rinna/bilingual-gpt-neox-4b-instruction-sft
@@ -262,11 +260,11 @@ class JSQuADWithRinnaBilingualInstructionSFT(JSQuADWithRinnaInstructionSFT):
 
     
 VERSIONS = [
-    JSQuAD,
-    JSQuADWithFintanPrompt,
-    JSQuADWithJAAlpacaPrompt,
-    JSQuADWithRinnaInstructionSFT,
-    JSQuADWithRinnaBilingualInstructionSFT,
+    JSQuADV11,
+    JSQuADV11WithFintanPrompt,
+    JSQuADV11WithJAAlpacaPrompt,
+    JSQuADV11WithRinnaInstructionSFT,
+    JSQuADV11WithRinnaBilingualInstructionSFT,
 ]
 
 
