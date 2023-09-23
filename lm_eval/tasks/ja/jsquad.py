@@ -40,7 +40,7 @@ class JSQuAD(Task):
     """
     prompt template is taken from [日本語に特化した60億パラメータ規模のGPTモデルの構築と評価](https://www.anlp.jp/proceedings/annual_meeting/2023/pdf_dir/H9-4.pdf)
     """
-    VERSION = 1.2
+    VERSION = 1.1
     PROMPT_VERSION = 0.1
     DATASET_PATH = "shunk031/JGLUE"
     DATASET_NAME = "JSQuAD"
@@ -184,8 +184,26 @@ class JSQuADWithFintanPrompt(JSQuAD):
     prompt template is taken from [ChatGPT vs BERT: どちらが日本語をより理解できるのか?](https://fintan.jp/page/9126/)
     """
     PROMPT_VERSION = 0.2
-    DESCRIPTION = "質問に対する回答を題名と文章から一言で抽出してください。回答は名詞で答えてください。\n\n"
+    DESCRIPTION = "質問に対する回答を文章から一言で抽出してください。回答は名詞で答えてください。\n\n"
     SEP = "\n"
+    def doc_to_text(self, doc):
+        return (
+            "文章:"
+            + doc["context"].split("[SEP]")[-1].strip()
+            + f"{self.SEP}"
+            + "質問:"
+            + doc["question"]
+            + f"{self.SEP}"
+            + "回答:"
+        )
+
+
+class JSQuADWithFintanPromptV12(JSQuADWithFintanPrompt):
+    """
+    prompt template is taken from [ChatGPT vs BERT: どちらが日本語をより理解できるのか?](https://fintan.jp/page/9126/)
+    """
+    VERSION = 1.2
+    DESCRIPTION = "質問に対する回答を題名と文章から一言で抽出してください。回答は名詞で答えてください。\n\n"
     def doc_to_text(self, doc):
         return (
             "題名:"
@@ -231,8 +249,41 @@ class JSQuADWithJAAlpacaPrompt(JSQuAD):
         ### 応答: 
         {response}
         """
+        input_text = f"文脈：{doc['context'].split('[SEP]')[-1].strip()}\n質問：{doc['question']}"
+        return f"### 指示:\n{self.INSTRUCTION}\n\n### 入力:\n{input_text}\n\n### 応答:\n"
+
+
+class JSQuADWithJAAlpacaPromptV12(JSQuADWithJAAlpacaPrompt):
+    """
+    This prompt format was inspired by the below data in fujiki/japanese_alpaca_data. 
+    ```
+    {
+        'instruction': '与えられた文脈に最も適した文を選択してください。', 
+        'input': '文脈：あなたは親友と現在の仕事の状況について話しています。\nA）私にはあまり選択肢がありません。\nB）他に選択肢がありません。\nC）私には本当に決断する必要がありません。', 
+        'output': 'A) 私には多くの選択肢がありません。'
+    }
+    ```
+    Reference:
+    - data: https://huggingface.co/datasets/fujiki/japanese_alpaca_data
+    - code: https://github.com/Stability-AI/gpt-neox/blob/c130a4edc1120dccec8f02a34eb60d3e8f484cd3/finetune/finetune_base_ja.py#LL118C23-L127C11
+    """
+    VERSION = 1.2
+    def doc_to_text(self, doc):
+        """
+        以下は、タスクを説明する指示と、文脈のある入力の組み合わせです。要求を適切に満たす応答を書きなさい。
+
+        ### 指示: 
+        {instruction}
+
+        ### 入力: 
+        {input}
+
+        ### 応答: 
+        {response}
+        """
         input_text = f"文脈：{doc['title']}\n{doc['context'].split('[SEP]')[-1].strip()}\n質問：{doc['question']}"
         return f"### 指示:\n{self.INSTRUCTION}\n\n### 入力:\n{input_text}\n\n### 応答:\n"
+
 
 
 class JSQuADWithRinnaInstructionSFT(JSQuAD):
@@ -246,8 +297,21 @@ class JSQuADWithRinnaInstructionSFT(JSQuAD):
     FEWSHOT_SEP = "<NL>"
 
     def doc_to_text(self, doc):
-        input_text = f"文脈：{doc['title']}\n{doc['context'].split('[SEP]')[-1].strip()}{self.SEP}質問：{doc['question']}"
+        input_text = f"文脈：{doc['context'].split('[SEP]')[-1].strip()}{self.SEP}質問：{doc['question']}"
         return f"ユーザー: {input_text}{self.SEP}システム: "
+
+
+class JSQuADWithRinnaInstructionSFTV12(JSQuADWithRinnaInstructionSFT):
+    """
+    Reference:
+    - HF Hub: https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-sft
+    """
+    VERSION = 1.2
+
+    def doc_to_text(self, doc):
+        input_text = f"文脈：{doc['title']}{self.SEP}{doc['context'].split('[SEP]')[-1].strip()}{self.SEP}質問：{doc['question']}"
+        return f"ユーザー: {input_text}{self.SEP}システム: "
+
 
 
 class JSQuADWithRinnaBilingualInstructionSFT(JSQuADWithRinnaInstructionSFT):
@@ -260,13 +324,29 @@ class JSQuADWithRinnaBilingualInstructionSFT(JSQuADWithRinnaInstructionSFT):
     SEP = "\n"
     FEWSHOT_SEP = "\n"
 
+
+class JSQuADWithRinnaBilingualInstructionSFTV12(JSQuADWithRinnaBilingualInstructionSFT):
+    """
+    Reference:
+    - HF Hub: https://huggingface.co/rinna/bilingual-gpt-neox-4b-instruction-sft
+    """
+    VERSION = 1.2
+
+    def doc_to_text(self, doc):
+        input_text = f"文脈：{doc['title']}{self.SEP}{doc['context'].split('[SEP]')[-1].strip()}{self.SEP}質問：{doc['question']}"
+        return f"ユーザー: {input_text}{self.SEP}システム: "
+
     
 VERSIONS = [
     JSQuAD,
     JSQuADWithFintanPrompt,
+    JSQuADWithFintanPromptV12,
     JSQuADWithJAAlpacaPrompt,
+    JSQuADWithJAAlpacaPromptV12,
     JSQuADWithRinnaInstructionSFT,
+    JSQuADWithRinnaInstructionSFTV12,
     JSQuADWithRinnaBilingualInstructionSFT,
+    JSQuADWithRinnaBilingualInstructionSFTV12
 ]
 
 
