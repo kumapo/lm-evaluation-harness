@@ -1,8 +1,8 @@
 {
   "results": {
     "jsquad-1.2-0.2": {
-      "exact_match": 39.53174245835209,
-      "f1": 49.49399460234075
+      "exact_match": 37.5056280954525,
+      "f1": 48.089805052618246
     }
   },
   "versions": {
@@ -10,8 +10,8 @@
   },
   "config": {
     "model": "hf-causal",
-    "model_args": "pretrained=cyberagent/open-calm-1b",
-    "num_fewshot": 3,
+    "model_args": "pretrained=cyberagent/open-calm-1b,device_map=auto,torch_dtype=auto",
+    "num_fewshot": 2,
     "batch_size": null,
     "device": "cuda",
     "no_cache": false,
