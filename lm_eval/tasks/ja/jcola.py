@@ -1,6 +1,6 @@
 """
 JCoLA: Japanese Corpus of Linguistic Acceptability
-https://www.anlp.jp/proceedings/annual_meeting/2022/pdf_dir/E7-1.pdf
+https://arxiv.org/pdf/2309.12676.pdf
 
 JCoLA is a novel dataset for targeted syntactic evaluations of language models in Japanese, which consists of 10,020 sentences with acceptability judgments by linguists. The sentences are manually extracted from linguistics journals, handbooks and textbooks.
 
@@ -26,11 +26,12 @@ class JCoLA(CoLA):
     DATASET_PATH = "shunk031/JGLUE"
     DATASET_NAME = "JCoLA"
     SEP = "\n"
-    CHOICES = {1: "はい", 0: "いいえ"}
+    # 1: acceptable, 0: unacceptable
+    CHOICES = {1: "いいえ", 0: "はい"}
 
     def doc_to_text(self, doc):
         # "{}\nQuestion: Does this sentence make sense?\nAnswer:"
-        return "{}{}質問: この文は意味を成していますか？{}答え:".format(
+        return "{}{}質問: この文の文法は訂正が必要ですか？{}答え:".format(
             doc["sentence"], self.SEP, self.SEP
         )
 
@@ -51,6 +52,7 @@ class JCoLAWithJAAlpacaPrompt(JCoLA):
     """
     PROMPT_VERSION = 0.3
     DESCRIPTION = "以下は、タスクを説明する指示と、文脈のある入力の組み合わせです。要求を適切に満たす応答を書きなさい。\n\n"
+    # INSTRUCTION = f"与えられた文の文法は訂正する必要があるか回答してください。\n\n出力は以下から選択してください：\n" + "\n".join(list(JCoLA.CHOICES.values()))
     INSTRUCTION = f"与えられた文章が意味を成しているかを回答してください。\n\n出力は以下から選択してください：\n" + "\n".join(list(JCoLA.CHOICES.values()))
 
     def doc_to_text(self, doc):
