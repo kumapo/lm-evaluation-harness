@@ -31,7 +31,7 @@ class JCoLA(CoLA):
 
     def doc_to_text(self, doc):
         # "{}\nQuestion: Does this sentence make sense?\nAnswer:"
-        return "{}{}質問: この文を統語的に評価すると容認可能ですか？{}答え:".format(
+        return "{}{}質問: この文は文法的ですか？{}答え:".format(
             doc["sentence"], self.SEP, self.SEP
         )
 
@@ -52,7 +52,7 @@ class JCoLAWithJAAlpacaPrompt(JCoLA):
     """
     PROMPT_VERSION = 0.3
     DESCRIPTION = "以下は、タスクを説明する指示と、文脈のある入力の組み合わせです。要求を適切に満たす応答を書きなさい。\n\n"
-    INSTRUCTION = f"与えられた文を統語的に評価すると容認可能であるかを回答してください。\n\n出力は以下から選択してください：\n" + "\n".join(list(JCoLA.CHOICES.values()))
+    INSTRUCTION = f"与えられた文が文法的であるかを回答してください。\n\n出力は以下から選択してください：\n" + "\n".join(list(JCoLA.CHOICES.values()))
 
     def doc_to_text(self, doc):
         """
@@ -77,7 +77,7 @@ class JCoLAWithRinnaInstructionSFT(JCoLA):
     - HF Hub: https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-sft
     """
     PROMPT_VERSION = 0.4
-    DESCRIPTION = "ユーザー: " + f"与えられた文を統語的に評価すると容認可能であるかを回答してください。出力は以下から選択してください：<NL>" + "<NL>".join(list(JCoLA.CHOICES.values())) + "<NL>システム: 分かりました。<NL>"
+    DESCRIPTION = "ユーザー: " + f"与えられた文が文法的であるかを回答してください。出力は以下から選択してください：<NL>" + "<NL>".join(list(JCoLA.CHOICES.values())) + "<NL>システム: 分かりました。<NL>"
     SEP = "<NL>"
     FEWSHOT_SEP = "<NL>"
 
@@ -92,7 +92,7 @@ class JCoLAWithRinnaBilingualInstructionSFT(JCoLAWithRinnaInstructionSFT):
     - HF Hub: https://huggingface.co/rinna/bilingual-gpt-neox-4b-instruction-sft
     """
     PROMPT_VERSION = 0.5
-    DESCRIPTION = "ユーザー: " + f"与えられた文を統語的に評価すると容認可能であるかを回答してください。出力は以下から選択してください：\n" + "\n".join(list(JCoLA.CHOICES.values())) + "\nシステム: 分かりました。\n"
+    DESCRIPTION = "ユーザー: " + f"与えられた文が文法的であるかを回答してください。出力は以下から選択してください：\n" + "\n".join(list(JCoLA.CHOICES.values())) + "\nシステム: 分かりました。\n"
     SEP = "\n"
     FEWSHOT_SEP = "\n"
 
