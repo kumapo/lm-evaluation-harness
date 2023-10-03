@@ -1,0 +1,22 @@
+{
+  "results": {
+    "jcola-0.1-0.3": {
+      "mcc": 0.01787312676331459,
+      "mcc_stderr": 0.02787945214912392
+    }
+  },
+  "versions": {
+    "jcola-0.1-0.3": 0.1
+  },
+  "config": {
+    "model": "hf-causal-experimental",
+    "model_args": "pretrained=meta-llama/Llama-2-7b-chat-hf,use_accelerate=True,dtype=auto",
+    "num_fewshot": 3,
+    "batch_size": 2,
+    "device": "cuda",
+    "no_cache": false,
+    "limit": null,
+    "bootstrap_iters": 100000,
+    "description_dict": {}
+  }
+}

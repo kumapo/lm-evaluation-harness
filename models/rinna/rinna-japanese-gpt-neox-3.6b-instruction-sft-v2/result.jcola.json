@@ -1,0 +1,22 @@
+{
+  "results": {
+    "jcola-0.1-0.4": {
+      "mcc": -0.03132571428785709,
+      "mcc_stderr": 0.028089257368601437
+    }
+  },
+  "versions": {
+    "jcola-0.1-0.4": 0.1
+  },
+  "config": {
+    "model": "hf-causal",
+    "model_args": "pretrained=rinna/japanese-gpt-neox-3.6b-instruction-sft-v2,use_fast=False,device_map=auto,torch_dtype=auto",
+    "num_fewshot": 3,
+    "batch_size": null,
+    "device": "cuda",
+    "no_cache": false,
+    "limit": null,
+    "bootstrap_iters": 100000,
+    "description_dict": {}
+  }
+}
