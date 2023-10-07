@@ -1,0 +1,22 @@
+{
+  "results": {
+    "jcola-0.1-0.1": {
+      "mcc": 0.021770927989028216,
+      "mcc_stderr": 0.03642798140912624
+    }
+  },
+  "versions": {
+    "jcola-0.1-0.1": 0.1
+  },
+  "config": {
+    "model": "hf-causal",
+    "model_args": "pretrained=cyberagent/open-calm-large,use_fast=True,device_map=auto,torch_dtype=auto",
+    "num_fewshot": 3,
+    "batch_size": null,
+    "device": "cuda",
+    "no_cache": false,
+    "limit": null,
+    "bootstrap_iters": 100000,
+    "description_dict": {}
+  }
+}
