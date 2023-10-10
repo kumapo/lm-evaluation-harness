@@ -6,6 +6,7 @@ JCoLA is a novel dataset for targeted syntactic evaluations of language models i
 
 Homepage: https://github.com/osekilab/JCoLA/tree/main
 """
+import os
 from lm_eval.tasks.glue import CoLA
 from lm_eval.base import rf
 
@@ -122,11 +123,13 @@ class JCoLAWithLlama2(JCoLAWithJAAlpacaPrompt):
     ```
     reference: https://huggingface.co/blog/llama2#how-to-prompt-llama-2
     """
+
     PROMPT_VERSION = 0.6
     DEFAULT_SYSTEM_PROMPT = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information."""
     SYSTEM_PROMPT = os.getenv("SYSTEM_PROMPT", DEFAULT_SYSTEM_PROMPT)
     DESCRIPTION = f"<s>[INST] <<SYS>>\n{SYSTEM_PROMPT}\n<</SYS>>\n\n"
     FEWSHOT_SEP = " </s><s>[INST] "
+
     def doc_to_text(self, doc):
         """
         Insert the following prompt into `{{ user_msg }}`, which is based on prompt version 0.3
