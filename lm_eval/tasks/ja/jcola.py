@@ -23,7 +23,7 @@ _CITATION = """
 
 class JCoLA(CoLA):
     VERSION = 0.1
-    PROMPT_VERSION = 0.1
+    PROMPT_VERSION = 0.0
     DATASET_PATH = "shunk031/JGLUE"
     DATASET_NAME = "JCoLA"
     SEP = "\n"
