@@ -113,25 +113,23 @@ class JCommonsenseQAWithFintanPrompt(JCommonsenseQA):
     prompt template is taken from [ChatGPT vs BERT: どちらが日本語をより理解できるのか?](https://fintan.jp/page/9126/)
     """
 
-    VERSION = 1.1
+    VERSION = 1.2
     PROMPT_VERSION = 0.2
-    DESCRIPTION = (
-        "質問と回答の選択肢を入力として受け取り、選択肢から回答を選択してください。なお、回答は選択肢の番号(例:0)でするものとします。 \n\n"
-    )
+    DESCRIPTION = "\n\n"
+    SEP = "\n"
+    FEWSHOT_SEP = "\n\n"
 
+    # NOTE: the reason why we dont choose template for stabilityai/japanese-stablelm-base-alpha-7b is
+    # the template seems to include 2 typos.
     def doc_to_text(self, doc):
         """
-        質問:question
-        選択肢:0.choice0,1.choice1, ...,4.choice4
-        回答:
-        """
-        choices = ",".join(
-            [f"{idx}.{choice}" for idx, choice in enumerate(doc["choices"])]
-        )
-        return f"質問:{doc['goal']}\n" f"選択肢:{choices}\n" "回答:"
 
-    def doc_to_target(self, doc):
-        return f"{doc['gold']}"
+        以下から解答を選択してください：{{option_0}}, {{option_1}}, {{option_2}}, {{option_3}}, {{option_4}}
+        質問：{{question}}
+        回答：
+        """
+        choices = ', '.join(doc['choices'])
+        return f"以下から解答を選択してください：{choices}{self.SEP}質問：{doc['goal']}{self.SEP}回答："
 
 
 class JCommonsenseQAWithJAAlpacaPrompt(JCommonsenseQA):
@@ -149,46 +147,55 @@ class JCommonsenseQAWithJAAlpacaPrompt(JCommonsenseQA):
     - code: https://github.com/Stability-AI/gpt-neox/blob/c130a4edc1120dccec8f02a34eb60d3e8f484cd3/finetune/finetune_base_ja.py#LL118C23-L127C11
     """
 
-    VERSION = 1.1
+    VERSION = 1.2
     PROMPT_VERSION = 0.3
     DESCRIPTION = "以下は、タスクを説明する指示と、文脈のある入力の組み合わせです。要求を適切に満たす応答を書きなさい。\n\n"
-    INSTRUCTION = "与えられた選択肢の中から、最適な答えを選んでください。"
+    INSTRUCTION = "正しい答えは何でしょう？"
+    SEP = "\n"
+    FEWSHOT_SEP = "\n\n"
 
     def doc_to_text(self, doc):
         """
         以下は、タスクを説明する指示と、文脈のある入力の組み合わせです。要求を適切に満たす応答を書きなさい。
 
-        ### 指示:
-        {instruction}
-
-        ### 入力:
-        {input}
-
-        ### 応答:
-        {response}
+        正しい答えは何でしょう？
+        0.{{option_0}}
+        1.{{option_1}}
+        2.{{option_2}}
+        3.{{option_3}}
+        4.{{option_4}}
+        問題：{{question}}
+        回答：
         """
-        choices = "\n".join([f"- {choice}" for choice in doc["choices"]])
-        instruction_text = self.INSTRUCTION + f"出力は以下から選択してください：\n{choices}"
-        input_text = f"{doc['goal']}"
-        return f"### 指示:\n{instruction_text}\n\n### 入力:\n{input_text}\n\n### 応答:\n"
+        choices = self.SEP.join(
+            [f"{idx}.{choice}" for idx, choice in enumerate(doc["choices"])]
+        )
+        # instruction_text = self.INSTRUCTION + f"\n{choices}"
+        # input_text = f"{doc['goal']}"
+        # return f"### 指示:\n{instruction_text}\n\n### 入力:\n{input_text}\n\n### 応答:\n"
+        return f"{self.INSTRUCTION}{self.SEP}{choices}{self.SEP}問題：{doc['goal']}{self.SEP}回答："
 
 
 class JCommonsenseQAWithRinnaInstructionSFT(JCommonsenseQA):
     """
-    Reference:
-    - HF Hub: https://huggingface.co/rinna/japanese-gpt-neox-3.6b-instruction-sft
+    This prompt template is based on [日本語LLMベンチマークと自動プロンプトエンジニアリング](https://tech.preferred.jp/ja/blog/prompt-tuning/)
     """
 
-    VERSION = 1.1
+    VERSION = 1.2
     PROMPT_VERSION = 0.4
-    DESCRIPTION = "ユーザー: 与えられた選択肢の中から、最適な答えを選んでください。<NL>システム: 分かりました。<NL>"
-    SEP = "<NL>"
-    FEWSHOT_SEP = "<NL>"
+    DESCRIPTION = "\n\n"
+    SEP = "\n\n"
+    FEWSHOT_SEP = "\n\n"
 
     def doc_to_text(self, doc):
-        choices = self.SEP.join([f"- {choice}" for choice in doc["choices"]])
-        input_text = f"質問：{doc['goal']}{self.SEP}" + f"選択肢：{self.SEP}{choices}"
-        return f"ユーザー: {input_text}{self.SEP}システム: "
+        """
+
+        以下より選択してください：{{option_0}}, {{option_1}}, {{option_2}}, {{option_3}}, {{option_4}}：
+
+        [質問]：{{question}}?
+        """
+        choices = ', '.join(doc['choices'])
+        return f"以下より選択してください：{choices}{self.SEP}[質問]：{doc['goal']}"
 
 
 class JCommonsenseQAWithRinnaBilingualInstructionSFT(
