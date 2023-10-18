@@ -13,6 +13,7 @@ class HFLM(BaseLM):
         low_cpu_mem_usage=None,
         torch_dtype=None,
         device_map=None,
+        offload_folder=None,
         subfolder=None,
         tokenizer=None,
         batch_size=1,
@@ -49,6 +50,7 @@ class HFLM(BaseLM):
             low_cpu_mem_usage=low_cpu_mem_usage,
             torch_dtype=torch_dtype,
             device_map=device_map,
+            offload_folder=offload_folder,
             revision=revision,
             trust_remote_code=trust_remote_code,
         ).eval()
