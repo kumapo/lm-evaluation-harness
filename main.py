@@ -88,6 +88,7 @@ def main():
     if args.description_dict_path:
         with open(args.description_dict_path, "r") as f:
             description_dict = json.load(f)
+    print(f"main: no_cache={args.no_cache}")
     results = evaluator.simple_evaluate(
         model=args.model,
         model_args=args.model_args,

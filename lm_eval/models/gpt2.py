@@ -20,6 +20,7 @@ class HFLM(BaseLM):
         load_in_8bit: Optional[bool] = False,
         trust_remote_code: Optional[bool] = False,
         use_fast: Optional[bool] = True,
+        additional_special_tokens: Optional[str] = None
     ):
         super().__init__()
 
@@ -66,6 +67,7 @@ class HFLM(BaseLM):
             revision=revision,
             trust_remote_code=trust_remote_code,
             use_fast=use_fast,
+            additional_special_tokens=additional_special_tokens
         )
         self.vocab_size = self.tokenizer.vocab_size
 

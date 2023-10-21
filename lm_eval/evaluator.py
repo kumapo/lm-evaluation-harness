@@ -69,6 +69,7 @@ def simple_evaluate(
         assert isinstance(model, lm_eval.base.LM)
         lm = model
 
+    print(f"evaluator: no_cache={no_cache}")
     if not no_cache:
         lm = lm_eval.base.CachingLM(
             lm,
