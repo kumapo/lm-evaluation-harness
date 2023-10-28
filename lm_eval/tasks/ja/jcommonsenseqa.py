@@ -140,7 +140,7 @@ class JCommonsenseQAWithFintanPrompt(JCommonsenseQA):
         choices = ",".join(
             [f"{idx}.{choice}" for idx, choice in enumerate(doc["choices"])]
         )
-        return f"質問:{doc['goal']}\n" f"選択肢:{choices}\n" "回答:"
+        return f"選択肢:{choices}\n" f"質問:{doc['goal']}\n" "回答:" # choices first, question last
 
     def doc_to_target(self, doc):
         return f"{doc['gold']}"
@@ -162,7 +162,7 @@ class JCommonsenseQAWithFintanPromptV21(JCommonsenseQA):
         回答：
         """
         choices = "\n".join([f"- {choice}" for choice in doc["choices"]])
-        input_text = f"質問：{doc['goal']}\n選択肢：\n{choices}\n回答："
+        input_text = f"選択肢：\n{choices}\n質問：{doc['goal']}\n回答：" # choices first, question last
         return input_text
 
 
@@ -199,10 +199,10 @@ class JCommonsenseQAWithJAAlpacaPrompt(JCommonsenseQA):
         ### 応答:
         {response}
         """
+        instruction_text = self.INSTRUCTION + f"\n質問：{doc['goal']}"
         choices = "\n".join([f"- {choice}" for choice in doc["choices"]])
-        instruction_text = self.INSTRUCTION + f"出力は以下から選択してください：\n{choices}"
-        input_text = f"{doc['goal']}"
-        return f"### 指示:\n{instruction_text}\n\n### 入力:\n{input_text}\n\n### 応答:\n"
+        input_text = f"出力は以下から選択してください：\n{choices}"
+        return f"### 指示:\n{instruction_text}\n\n### 入力:\n{input_text}\n\n### 応答:\n" # question first
 
 
 class JCommonsenseQAWithRinnaInstructionSFT(JCommonsenseQA):
@@ -219,7 +219,7 @@ class JCommonsenseQAWithRinnaInstructionSFT(JCommonsenseQA):
 
     def doc_to_text(self, doc):
         choices = self.SEP.join([f"- {choice}" for choice in doc["choices"]])
-        input_text = f"質問：{doc['goal']}{self.SEP}" + f"選択肢：{self.SEP}{choices}"
+        input_text = f"選択肢：{self.SEP}{choices}" + f"質問：{doc['goal']}{self.SEP}" # choices first, question last
         return f"ユーザー: {input_text}{self.SEP}システム: "
 
 
@@ -270,9 +270,12 @@ class JCommonsenseQAWithLlama2(JCommonsenseQA):
         ```
         """
         choices = "\n".join([f"- {choice}" for choice in doc["choices"]])
-        instruction_text = self.INSTRUCTION + f"出力は以下から選択してください：\n{choices}"
         input_text = f"質問：{doc['goal']}"
-        return f"{instruction_text}\n\n{input_text} [/INST] "
+        instruction_text = self.INSTRUCTION + input_text
+        choices = f"出力は以下から選択してください：\n{choices}"
+        # instruction_text = self.INSTRUCTION + f"出力は以下から選択してください：\n{choices}"
+        # return f"{instruction_text}\n\n{input_text} [/INST] "
+        return f"{instruction_text}\n\n{choices} [/INST] " # question first, chioces last
 
 
 VERSIONS = [
