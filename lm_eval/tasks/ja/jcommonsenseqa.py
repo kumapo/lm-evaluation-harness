@@ -402,6 +402,7 @@ VERSIONS = [
     JCommonsenseQA,
     JCommonsenseQAWithFintanPrompt,
     JCommonsenseQAWithFintanPromptV21,
+    JCommonsenseQAWithFintanPromptV22,
     JCommonsenseQAWithJAAlpacaPrompt,
     JCommonsenseQAWithJAAlpacaPromptV32,
     JCommonsenseQAWithRinnaInstructionSFT,
