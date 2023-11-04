@@ -180,7 +180,7 @@ class JCommonsenseQAWithFintanPromptV22(JCommonsenseQAWithFintanPromptV21):
         回答：
         """
         choices = "\n".join([f"- {choice}" for choice in doc["choices"]])
-        input_text = f"選択肢：\n{choices}\n質問：{doc['goal']}\n回答：" # question last
+        input_text = f"選択肢：\n{choices}\n質問：{doc['goal']}\n回答："  # question last
         return input_text
 
 
@@ -256,7 +256,7 @@ class JCommonsenseQAWithJAAlpacaPromptV32(JCommonsenseQAWithJAAlpacaPrompt):
         instruction_text = self.INSTRUCTION + f"\n質問：{doc['goal']}"
         choices = "\n".join([f"- {choice}" for choice in doc["choices"]])
         input_text = f"出力は以下から選択してください：\n{choices}"
-        return f"### 指示:\n{instruction_text}\n\n### 入力:\n{input_text}\n\n### 応答:\n" # question first
+        return f"### 指示:\n{instruction_text}\n\n### 入力:\n{input_text}\n\n### 応答:\n"  # question first
 
 
 class JCommonsenseQAWithRinnaInstructionSFT(JCommonsenseQA):
@@ -287,7 +287,9 @@ class JCommonsenseQAWithRinnaInstructionSFTV42(JCommonsenseQAWithRinnaInstructio
 
     def doc_to_text(self, doc):
         choices = self.SEP.join([f"- {choice}" for choice in doc["choices"]])
-        input_text = f"選択肢：{self.SEP}{choices}" + f"質問：{doc['goal']}{self.SEP}" # question last
+        input_text = (
+            f"選択肢：{self.SEP}{choices}" + f"質問：{doc['goal']}{self.SEP}"
+        )  # question last
         return f"ユーザー: {input_text}{self.SEP}システム: "
 
 
@@ -317,7 +319,9 @@ class JCommonsenseQAWithRinnaBilingualInstructionSFTV52(
 
     def doc_to_text(self, doc):
         choices = self.SEP.join([f"- {choice}" for choice in doc["choices"]])
-        input_text = f"選択肢：{self.SEP}{choices}" + f"質問：{doc['goal']}{self.SEP}" # question last
+        input_text = (
+            f"選択肢：{self.SEP}{choices}" + f"質問：{doc['goal']}{self.SEP}"
+        )  # question last
         return f"ユーザー: {input_text}{self.SEP}システム: "
 
 
@@ -379,7 +383,7 @@ class JCommonsenseQAWithLlama2V62(JCommonsenseQAWithLlama2):
         """
         Insert the following prompt into `{{ user_msg }}`, which is based on prompt version 0.3
         ```
-        与えられた選択肢の中から、最適な答えを選んでください。質問：... 
+        与えられた選択肢の中から、最適な答えを選んでください。質問：...
 
         出力は以下から選択してください：
         - choice0
@@ -391,7 +395,7 @@ class JCommonsenseQAWithLlama2V62(JCommonsenseQAWithLlama2):
         input_text = f"質問：{doc['goal']}"
         instruction_text = self.INSTRUCTION + input_text
         choices = f"出力は以下から選択してください：\n{choices}"
-        return f"{instruction_text}\n\n{choices} [/INST] " # question first
+        return f"{instruction_text}\n\n{choices} [/INST] "  # question first
 
 
 VERSIONS = [
@@ -405,7 +409,7 @@ VERSIONS = [
     JCommonsenseQAWithRinnaBilingualInstructionSFT,
     JCommonsenseQAWithRinnaBilingualInstructionSFTV52,
     JCommonsenseQAWithLlama2,
-    JCommonsenseQAWithLlama2V62
+    JCommonsenseQAWithLlama2V62,
 ]
 
 
